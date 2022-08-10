@@ -344,17 +344,20 @@ const client = new OpenCGAClient({
         return this.lineSplitter(str);
     }
 
-    async launchJob(e) {
-        if (this.config.resource === "VARIANT") {
+    async launchJob() {
+        if (this.config.resource === "VARIANT" || this.config.resource === "CLINICAL_VARIANT") {
             try {
-                const data = {...this.query,
+                const data = {
+                    ...this.query,
                     study: this.opencgaSession.study.fqn,
                     summary: true,
-                    outputFileName: "variants"
+                    outputFileName: "variants",
                 };
-                let params = {study: this.opencgaSession.study.fqn};
+                const params = {
+                    study: this.opencgaSession.study.fqn,
+                };
                 if (this.jobId) {
-                    params = {...params, jobId: this.jobId};
+                    params["jobId"] = this.jobId;
                 }
                 const restResponse = await this.opencgaSession.opencgaClient.variants().runExport(data, params);
                 const job = restResponse.getResult(0);
@@ -497,10 +500,10 @@ const client = new OpenCGAClient({
                         </div>
                         <div>
                             ${this.format === "tab" && this.exportFields?.length ? html`
-                                <span data-toggle="collapse" class="export-fields-button collapsed" data-target="#exportFields">
+                                <span data-toggle="collapse" class="export-fields-button collapsed" data-target="#${this._prefix}exportFields">
                                     Customise export fields
                                 </span>
-                                <div id="exportFields" class="collapse">
+                                <div id="${this._prefix}exportFields" class="collapse">
                                     <ul>
                                         ${this.exportFields.filter(li => !li.excludeFromExport).map((li, i) => html`
                                         <li>
